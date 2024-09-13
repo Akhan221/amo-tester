@@ -23,7 +23,9 @@ import flask
 import functions_framework
 from google.cloud import aiplatform
 import google.cloud.logging
+from google.cloud import storage
 
+NAMING_PREFIX = 'dry-beans-dt'
 PROJECT_ID = 'airflow-sandbox-392816'
 PIPELINE_ROOT = 'gs://airflow-sandbox-392816-dry-beans-dt-bucket/pipeline_root'
 PIPELINE_JOB_RUNNER_SERVICE_ACCOUNT = 'vertex-pipelines@airflow-sandbox-392816.iam.gserviceaccount.com'
@@ -32,6 +34,16 @@ PIPELINE_JOB_RUNNER_SERVICE_ACCOUNT = 'vertex-pipelines@airflow-sandbox-392816.i
 client = google.cloud.logging.Client(project=PROJECT_ID)
 client.setup_logging()
 
+
+def read_gs_auto_retraining_params_file():
+    storage_client = storage.Client(project=PROJECT_ID)
+    bucket_name = PIPELINE_ROOT.split('/')[2]
+    bucket = storage_client.get_bucket(bucket_name)
+    file_name = f'pipeline_root/{NAMING_PREFIX}/automatic_retraining_parameters.json'
+    blob = bucket.blob(file_name)
+    data = json.loads(blob.download_as_string(client=None))
+    logging.info(f'Retraining using the following parameters located at {bucket_name}/{file_name}: \n{data}')
+    return data
 
 @functions_framework.http
 def process_request(request: flask.Request) -> flask.Response:
@@ -62,6 +74,14 @@ def process_request(request: flask.Request) -> flask.Response:
         logging.info(data_payload)
 
         optional_labels = {}
+        
+        try:
+            if data_payload['logName'] == f'projects/{PROJECT_ID}/logs/aiplatform.googleapis.com%2Fmodel_monitoring_anomaly':
+                logging.info('Model monitoring anomaly detected - triggering model retraining.')
+                data_payload = read_gs_auto_retraining_params_file()
+                optional_labels['trigger'] = 'monitoring_anomaly'
+        except KeyError:
+            pass
         
         if 'gs_pipeline_spec_path' in data_payload:
             gs_pipeline_spec_path = data_payload['gs_pipeline_spec_path']

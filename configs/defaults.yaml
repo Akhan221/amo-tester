@@ -26,14 +26,14 @@ gcp:
   pipeline_job_submission_service_name: dry-beans-dt-job-submission-svc
   pipeline_job_submission_service_type: cloud-functions
   project_id: airflow-sandbox-392816
-  setup_model_monitoring: false
+  setup_model_monitoring: true
   pubsub_topic_name: dry-beans-dt-queueing-svc
   schedule_location: us-central1
   schedule_name: dry-beans-dt-schedule
-  schedule_pattern: No Schedule Specified
+  schedule_pattern: 59 11 * * 0
   source_repository_branch: automlops
-  source_repository_name: dry-beans-dt-repository
-  source_repository_type: cloud-source-repositories
+  source_repository_name: Akhan221/amo-tester
+  source_repository_type: github
   storage_bucket_location: us-central1
   storage_bucket_name: airflow-sandbox-392816-dry-beans-dt-bucket
   vpc_connector: No VPC Specified
@@ -49,3 +49,17 @@ tooling:
   provisioning_framework: gcloud
   orchestration_framework: kfp
   use_ci: true
+monitoring:
+  target_field: null
+  model_endpoint: null
+  alert_emails: null
+  auto_retraining_params: null
+  drift_thresholds: null
+  gs_auto_retraining_params_path: null
+  job_display_name: null
+  log_sink_name: null
+  monitoring_interval: null
+  monitoring_location: null
+  sample_rate: null
+  skew_thresholds: null
+  training_dataset: null

@@ -40,6 +40,10 @@ For a user-guide, please view these [slides](https://github.com/GoogleCloudPlatf
     ├── run_pipeline.sh                            : Submit the PipelineJob to Vertex AI.
     ├── run_all.sh                                 : Builds components, compiles pipeline specs, and submits the PipelineJob.
     ├── publish_to_topic.sh                        : Publishes a message to a Pub/Sub topic to invoke the pipeline job submission service.
+    ├── create_model_monitoring_job.sh             : Creates or updated a Vertex AI model monitoring job for a given deployed model endpoint.
+├── model_monitoring                               : Code for building and maintaining model monitoring jobs.
+    ├── requirements.txt                           : Package requirements for creating and updating model monitoring jobs.
+    ├── monitor.py                                 : Creates a ModelDeploymentMonitoringJob and optionally creates a Log Sink for automatic retraining.
 ├── services                                       : MLOps services related to continuous training.
     ├── submission_service                         : REST API service used to submit pipeline jobs to Vertex AI.
         ├── Dockerfile                             : Dockerfile for running the REST API service.

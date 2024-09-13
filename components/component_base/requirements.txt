@@ -7,5 +7,5 @@ joblib
 kfp<2.0.0
 pandas
 pyarrow
-scikit-learn==1.2.0
+scikit-learn==1.2.2
 tensorflow

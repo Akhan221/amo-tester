@@ -30,9 +30,9 @@ PIPELINE_JOB_RUNNER_SERVICE_ACCOUNT_LONG="vertex-pipelines@airflow-sandbox-39281
 PROJECT_ID="airflow-sandbox-392816"
 PUBSUB_TOPIC_NAME="dry-beans-dt-queueing-svc"
 SCHEDULE_NAME="dry-beans-dt-schedule"
-SCHEDULE_PATTERN="No Schedule Specified"
+SCHEDULE_PATTERN="59 11 * * 0"
 SCHEDULE_LOCATION="us-central1"
-SOURCE_REPO_NAME="dry-beans-dt-repository"
+SOURCE_REPO_NAME="Akhan221/amo-tester"
 SOURCE_REPO_BRANCH="automlops"
 STORAGE_BUCKET_NAME="airflow-sandbox-392816-dry-beans-dt-bucket"
 STORAGE_BUCKET_LOCATION="us-central1"
@@ -48,8 +48,9 @@ gcloud services enable \
   storage.googleapis.com \
   aiplatform.googleapis.com \
   artifactregistry.googleapis.com \
+  cloudscheduler.googleapis.com \
   cloudfunctions.googleapis.com \
-  sourcerepo.googleapis.com \
+  logging.googleapis.com \
 
 echo -e "$GREEN Setting up Artifact Registry in project $PROJECT_ID $NC"
 if ! (gcloud artifacts repositories list --project="$PROJECT_ID" --location=$ARTIFACT_REPO_LOCATION | grep -E "(^|[[:blank:]])$ARTIFACT_REPO_NAME($|[[:blank:]])"); then
@@ -123,18 +124,6 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
     --no-user-output-enabled
 
 
-echo -e "$GREEN Setting up Cloud Source Repository in project $PROJECT_ID $NC"
-if ! (gcloud source repos list --project="$PROJECT_ID" | grep -E "(^|[[:blank:]])$SOURCE_REPO_NAME($|[[:blank:]])"); then
-
-  echo "Creating Cloud Source Repository: ${SOURCE_REPO_NAME} in project $PROJECT_ID"
-  gcloud source repos create $SOURCE_REPO_NAME
-
-else
-
-  echo "Cloud Source Repository: ${SOURCE_REPO_NAME} already exists in project $PROJECT_ID"
-
-fi
-
 # Create Pub/Sub Topic
 echo -e "$GREEN Setting up Queueing Service in project $PROJECT_ID $NC"
 if ! (gcloud pubsub topics list | grep -E "(^|[[:blank:]])projects/${PROJECT_ID}/topics/${PUBSUB_TOPIC_NAME}($|[[:blank:]])"); then
@@ -162,21 +151,20 @@ gcloud functions deploy $PIPELINE_JOB_SUBMISSION_SERVICE_NAME \
   --source=${BASE_DIR}services/submission_service \
   --service-account=$PIPELINE_JOB_RUNNER_SERVICE_ACCOUNT_LONG
 
-# Create cloud build trigger
-echo -e "$GREEN Setting up Cloud Build Trigger in project $PROJECT_ID $NC"
-if ! (gcloud beta builds triggers list --project="$PROJECT_ID" --region="$BUILD_TRIGGER_LOCATION" | grep -E "(^|[[:blank:]])name: $BUILD_TRIGGER_NAME($|[[:blank:]])"); then
 
-  echo "Creating Cloudbuild Trigger on branch $SOURCE_REPO_BRANCH in project $PROJECT_ID for repo ${SOURCE_REPO_NAME}"
-  gcloud beta builds triggers create cloud-source-repositories \
-    --ignored-files=.gitignore \
-    --region=$BUILD_TRIGGER_LOCATION \
-    --name=$BUILD_TRIGGER_NAME \
-    --repo=$SOURCE_REPO_NAME \
-    --branch-pattern="$SOURCE_REPO_BRANCH" \
-    --build-config=cloudbuild.yaml
+# Create Cloud Scheduler Job
+echo -e "$GREEN Setting up Cloud Scheduler Job in project $PROJECT_ID $NC"
+if ! (gcloud scheduler jobs list --location=$SCHEDULE_LOCATION | grep -E "(^|[[:blank:]])$SCHEDULE_NAME($|[[:blank:]])"); then
+
+  echo "Creating Cloud Scheduler Job: ${SCHEDULE_NAME} in project $PROJECT_ID"
+  gcloud scheduler jobs create pubsub $SCHEDULE_NAME \
+    --schedule="${SCHEDULE_PATTERN}" \
+    --location=$SCHEDULE_LOCATION \
+    --topic=$PUBSUB_TOPIC_NAME \
+    --message-body "$(cat ${BASE_DIR}pipelines/runtime_parameters/pipeline_parameter_values.json)"
 
 else
 
-  echo "Cloudbuild Trigger already exists in project $PROJECT_ID for repo ${SOURCE_REPO_NAME}"
+  echo "Cloud Scheduler Job: ${SCHEDULE_NAME} already exists in project $PROJECT_ID"
 
 fi

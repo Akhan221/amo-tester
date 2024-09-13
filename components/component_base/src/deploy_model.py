@@ -34,6 +34,9 @@ def deploy_model(
         project_id: Project_id.
         region: Region.
     """
+    import pprint as pp
+    import random
+
     from google.cloud import aiplatform
 
     aiplatform.init(project=project_id, location=region)
@@ -70,6 +73,16 @@ def deploy_model(
     endpoint = uploaded_model.deploy(
         machine_type='n1-standard-4',
         deployed_model_display_name='deployed-beans-model')
+
+    sample_input = [[random.uniform(0, 300) for x in range(16)]]
+
+    # Test endpoint predictions
+    print('running prediction test...')
+    try:
+        resp = endpoint.predict(instances=sample_input)
+        pp.pprint(resp)
+    except Exception as ex:
+        print('prediction request failed', ex)
 
 def main():
     """Main executor."""
