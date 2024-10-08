@@ -45,7 +45,7 @@ pipelines:
   pipeline_region: us-central1
   pipeline_storage_path: gs://airflow-sandbox-392816-dry-beans-dt-bucket/pipeline_root
 tooling:
-  deployment_framework: cloud-build
+  deployment_framework: github-actions
   provisioning_framework: gcloud
   orchestration_framework: kfp
   use_ci: true
