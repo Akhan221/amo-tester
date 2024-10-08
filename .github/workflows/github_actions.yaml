@@ -40,7 +40,7 @@ jobs:
         id: auth
         uses: 'google-github-actions/auth@v2'
         with:
-          token_format: 'access_token'
+          token_format: 'access_token' 
           workload_identity_provider: 'projects/1063498356496/locations/global/workloadIdentityPools/github-example/providers/github-example-provider' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider 
           service_account: 'github-sa@airflow-sandbox-392816.iam.gserviceaccount.com'     # e.g. - my-service-account@my-project.iam.gserviceaccount.com
           project_id: 'airflow-sandbox-392816'
