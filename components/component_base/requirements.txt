@@ -5,6 +5,7 @@ google-cloud-aiplatform
 google-cloud-bigquery
 joblib
 kfp<2.0.0
+numpy==1.26.4
 pandas
 pyarrow
 scikit-learn==1.2.2
