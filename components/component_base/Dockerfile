@@ -21,3 +21,5 @@ RUN python -m pip install -r \
 COPY ./src /pipelines/component/src
 ENTRYPOINT ["/bin/bash"]
 
+
+
