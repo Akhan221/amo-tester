@@ -20,3 +20,4 @@ RUN python -m pip install -r \
     && rm -f requirements.txt
 COPY ./src /pipelines/component/src
 ENTRYPOINT ["/bin/bash"]
+
